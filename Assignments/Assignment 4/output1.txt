@@ -1,0 +1,20 @@
+                                                                                                                                                                                                                                                                                                                                                  /usr/lib/locale/locale-archive
+7f50bf1b9000-7f50bf36f000 /usr/lib64/libc-2.17.so
+7f50bf36f000-7f50bf56f000 /usr/lib64/libc-2.17.so
+7f50bf56f000-7f50bf573000 /usr/lib64/libc-2.17.so
+7f50bf573000-7f50bf575000 /usr/lib64/libc-2.17.so
+7f50bf575000-7f50bf57a000 /usr/lib64/ld-2.17.so
+7f50bf79b000-7f50bf79c000 /usr/lib64/ld-2.17.so
+7f50bf79a000-7f50bf79b000 /usr/lib64/ld-2.17.so
+7f50bf770000-7f50bf773000 /usr/local/cs/coreutils-8.26/bin/cat
+00608000-00609000 /usr/local/cs/coreutils-8.26/bin/cat
+00607000-00608000 /usr/local/cs/coreutils-8.26/bin/cat
+01f0a000-01f2b000 ---p 23804465 23804465 23804465 392150 392150 392150 392150 0 0 0 0 0 0 0 0 08:07 08:07 08:07 08:07 08:07 08:07 08:07 08:07 00:29 00:29 00:29 00:00 00:00 00:00 00:00 00:00 00:00 00:00 00:00 00020000 00008000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00007000 0001f000 001b6000 001b6000 001ba000 00400000-00408000 131618 411709 411709 411709 
+7f50bf799000-7f50bf79a000 
+7f50bf776000-7f50bf799000 
+7f50bf57a000-7f50bf59a000 
+7ffde0922000-7ffde0943000 r--p r--p r--p r--p r-xp r-xp r-xp r-xp r-xp rw-p rw-p rw-p rw-p rw-p rw-p rw-p rw-p rw-p [heap]
+7f50b8c90000-7f50bf1b9000 [stack]
+7ffde09cb000-7ffde09cd000 [vdso]
+ffffffffff600000-ffffffffff601000 [vsyscall]
+ 

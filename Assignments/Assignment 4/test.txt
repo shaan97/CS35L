@@ -1,0 +1,19 @@
+00400000-00408000 r-xp 00000000 00:29 23804465                           /usr/local/cs/coreutils-8.26/bin/cat
+00607000-00608000 r--p 00007000 00:29 23804465                           /usr/local/cs/coreutils-8.26/bin/cat
+00608000-00609000 rw-p 00008000 00:29 23804465                           /usr/local/cs/coreutils-8.26/bin/cat
+01f0a000-01f2b000 rw-p 00000000 00:00 0                                  [heap]
+7f50b8c90000-7f50bf1b9000 r--p 00000000 08:07 131618                     /usr/lib/locale/locale-archive
+7f50bf1b9000-7f50bf36f000 r-xp 00000000 08:07 392150                     /usr/lib64/libc-2.17.so
+7f50bf36f000-7f50bf56f000 ---p 001b6000 08:07 392150                     /usr/lib64/libc-2.17.so
+7f50bf56f000-7f50bf573000 r--p 001b6000 08:07 392150                     /usr/lib64/libc-2.17.so
+7f50bf573000-7f50bf575000 rw-p 001ba000 08:07 392150                     /usr/lib64/libc-2.17.so
+7f50bf575000-7f50bf57a000 rw-p 00000000 00:00 0 
+7f50bf57a000-7f50bf59a000 r-xp 00000000 08:07 411709                     /usr/lib64/ld-2.17.so
+7f50bf770000-7f50bf773000 rw-p 00000000 00:00 0 
+7f50bf776000-7f50bf799000 rw-p 00000000 00:00 0 
+7f50bf799000-7f50bf79a000 r--p 0001f000 08:07 411709                     /usr/lib64/ld-2.17.so
+7f50bf79a000-7f50bf79b000 rw-p 00020000 08:07 411709                     /usr/lib64/ld-2.17.so
+7f50bf79b000-7f50bf79c000 rw-p 00000000 00:00 0 
+7ffde0922000-7ffde0943000 rw-p 00000000 00:00 0                          [stack]
+7ffde09cb000-7ffde09cd000 r-xp 00000000 00:00 0                          [vdso]
+ffffffffff600000-ffffffffff601000 r-xp 00000000 00:00 0                  [vsyscall]

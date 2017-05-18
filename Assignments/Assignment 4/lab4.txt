@@ -130,9 +130,9 @@ diff -u coreutils-with-bug/lib/timespec.h timespec-fix.h > lab4.diff
 
 Now we can apply the patch and configure/make:
 
-patch -p1 lab4.diff
+patch -p0 lab4.diff
 
-NOTE: THE P1 FLAG IS USED FOR THE PATCH IN THE DIRECTORY HOLDING THE coreutils-with-bug DIRECTORY.
+NOTE: THE P0 FLAG IS USED FOR THE PATCH IN THE DIRECTORY HOLDING THE coreutils-with-bug DIRECTORY.
 Then we configure and make:
 
 cd coreutils-with-bug

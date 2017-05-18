@@ -1,0 +1,150 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+typedef int bool;
+#define true 1
+#define false 0
+
+int frobcmp(char const * a, char const * b){
+  int i = 0;
+   
+  while(a[i] != ' ' && b[i] != ' '){
+    char a_current = a[i] ^ 42;
+    char b_current = b[i] ^ 42;
+    if(a_current < b_current)
+      return -1;
+    else if(b_current < a_current)
+      return 1;
+    i++;
+  }
+
+  // a[i] == ' ' || b[i] == ' '
+  if( a[i] == ' ' && b[i] == ' ' )
+    return 0;
+  else if(a[i] == ' '){
+    // a is a prefix of b
+    return -1;
+  }
+  else{
+    // b is a prefix of a
+    return 1;
+  }
+
+}
+
+
+int wrap_frobcmp(const void * a, const void * b){
+  return frobcmp(*(char const **)a, *(char const **)b);
+}
+
+int main(){
+  char** words;
+  long capacity = 1;
+  long numWords = 0;
+
+  words = (char **)malloc(sizeof(char*));
+  if(words == NULL){
+    fprintf(stderr, "Error: Malloc Failure");
+    exit(1);
+  }
+  words[0] = (char *)malloc(sizeof(char));
+  if(words[0] == NULL){
+    fprintf(stderr, "Error: Malloc Failure");
+    exit(1);
+  }
+  char nextChar;
+
+  while( (nextChar = getchar()) != EOF ){
+    // nextChar has character for next word
+    numWords++;
+    if(capacity < numWords){
+      // We need more bytes for array of words
+      capacity = numWords * 2;
+      words = (char **)realloc(words, capacity*sizeof(char*));
+      if(words == NULL){
+	fprintf(stderr, "Error: Realloc Failure");
+	exit(1);
+      }
+    }
+
+    // There is space to insert new word.
+    
+    long word_cap = 0;
+    long numChar = 0;
+
+
+    bool lastChar = false;
+    
+
+    do{
+      // Next character to insert in nextChar;
+      numChar++;
+      
+      if(nextChar == ' ')
+	lastChar = true;
+
+
+      if( word_cap < numChar ){
+	// Need more space in current word
+	word_cap = numChar * 2;
+	words[numWords - 1] = (char *)realloc(words[numWords - 1], word_cap*sizeof(char));
+
+	if(words[numWords - 1] == NULL){
+	  fprintf(stderr, "Error: Realloc Failure");
+	  exit(1);
+	}
+      }
+
+      // There is space to insert new character.
+
+      words[numWords - 1][numChar - 1] = nextChar;
+      if(nextChar != ' ')
+	nextChar = getchar();
+      
+      if(nextChar == EOF)
+	nextChar = ' ';
+    
+    }while(!lastChar);
+
+
+  }
+  
+  /*int i, j;
+  for(i = 0; i < numWords; i++){
+    for(j = 0; words[i][j] != ' '; j++){
+      printf("%c", words[i][j]);
+    }
+    printf("\n");
+  }
+  */
+  /*int i;
+  for(i = 0; i < numChar; i++){
+    printf("%c", words[numWords - 1][i]);
+    }*/
+
+  // Now we have an array of words, so we need to sort them.
+
+
+  qsort(words, numWords, sizeof(char*), wrap_frobcmp);
+
+  int i, j;
+  for(i = 0; i < numWords; i++){
+    j = 0;
+    char next;
+    do{
+      next = words[i][j];
+      putchar(next);
+      j++;
+    }while(next != ' ');
+      
+  }
+
+  for(i = 0; i < numWords; i++){
+    free(words[i]);
+  }
+  free(words);
+  
+  return 0;
+}
+
