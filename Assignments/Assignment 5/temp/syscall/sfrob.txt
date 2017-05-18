@@ -1,0 +1,128 @@
+Using our rewritten version of sfrob, sfrobu, we can measure
+differences in performance between the two using the time command.
+As asked by the specification, we are looking for the number
+of comparisons as a function of the number of input lines. 
+
+To avoid a cluster of linux commands on this report, I will tell
+you the general command used to accumulate the data for the following
+table. I create a global variable to count the number of times the
+comparison function is called, and I print it out at the end.
+Thus
+
+./sfrobu < output.txt | tail -1
+./sfrob < output.txt | tail -1
+
+Provides us the number of comparisons. Using time we can also get the
+amount of time elapsed for every input.
+
+
+cat output.txt | time -p ./sfrobu
+cat output.txt | time -p ./sfrob
+
+Using these four commands we accumulate the following table of data.
+
+sfrobu
+Input Words		Time Elapsed		Comparisons Made
+286			real:0.00 (negligible)
+			user:0.00
+			sys:0.00		1974
+
+2299			real:0.01
+			user: 0.00
+			sys: 0.03		22613
+
+22254			real:.04
+			user:.00
+			sys:.03			290955
+
+221762			real:.36
+			user:.04
+			sys: 0.00		3623841
+
+
+
+
+
+
+
+sfrob
+Input Lines		Time Elapsed		Comparisons Made
+286			real:0.00 (negligible)
+			user:0.00
+			sys: 0.00		1974
+
+2299			real:0.00 (negligible)
+			user:0.00
+			sys:0.00		22613
+
+22254			real:.03
+			user: .02
+			sys: 0.00		290955
+
+
+221762			real:.29
+			user: .26
+			sys: 0.00		3623841
+
+
+As we can see, sfrobu and sfrob have very similar data value for each
+of the three columns. The input lines since they are our independent
+variable. The comparisons made are unsurprisingly the same, since
+quick sort implementation doesn't change between the two versions.
+
+The time elapsed is actually very similar for both for small values.
+However, as the inputs start to grow larger, there does indeed
+seem to be a disparity between sfrobu times and sfrob times. This is
+because the buffered I/O vs. unbuffered I/O choice becomes more 
+apparent in time efficiency with larger inputs. Unbuffered is supposed
+to be slower due to the fact that one byte is read at a time, and that
+is indeed what we see.
+
+
+
+Now we want to compare the time performance of all variants of sfrob
+(including our new shell script). We perform the following command
+for varying input sizes on all the variants to calculate their time:
+
+cat output.txt | time -p ./sfrob(u/s) (-f)
+
+The times are in the format:
+	real: X.XX
+	user: X.XX
+	sys:  X.XX
+
+Input	sfrob	sfrobu	sfrobu(-f)	sfrobs	sfrobs(-f)
+286	.00	.00	.00		.00	.00
+	.00	.00	.00		.00	.00
+	.00	.00	.00		.00	.00
+
+2299	.00	.01	.01		.00	.00
+	.00	.00	.00		.00	.00
+	.00	.00	.00		.00	.00
+
+22254	.02	.04	.04		.01	.01
+	.01	.00	.00		.01	.01
+	.00	.03	.04		.00	.00
+
+221762	.02	.05	.04		.02	.01
+	.01	.00	.00		.00	.01
+	.00	.05	.04		.00	.01
+
+1283205	2.06	2.50	2.68		.74	.93
+	1.86	.17	.23		.59	.81
+	.05	2.32	2.45		.04	.05
+
+
+As we can see, small inputs have relatively little difference
+between the various implementations. However, as input size
+increases, sfrobu with the -f flag has the worst time
+efficiency. The sfrobu without -f also has similar
+time efficiency. This makes sense since there is some extra
+overhead with the -f flag, requiring the call toupper(...)
+for all the bytes. Both implement an unbuffered I/O version,
+which we have already discussed is much slower. sfrob is also
+relatively slow, but the fact that is buffered increases its time
+relative to sfrobu. sfrobs and sfrobs with -f both use extremely
+fine tuned versions of the translate and sorting programs, and
+so it makes sense that they have an optimal time difference (though
+-f takes slightly more time due to similar overhead). 

@@ -1,0 +1,164 @@
+SHAAN MATHUR UID: 904606576
+
+1.)
+We begin by programming tr2b.c. This is a relatively simple program to come up with.
+There are some corner test cases in which an error should be invoked (i.e. two
+arguments are of different sizes, the first alphabet has repeated letters). The
+latter of those two can be handled by making a character table and incrementing
+the index if that character appears. If there is more than one character, an error
+will be reported and the program would terminate.
+
+This table could be used to see if the next character in STDIN is in the alphabet.
+If it is not, then it can be quickly sent to STDOUT. If it is, we can walk through
+the first string argument, find the appropriate index of the character, and use
+that to index into the second string argument to find the mapped-to character.
+
+Reading from STDIN would use getchar, and STDOUT would use putchar. These use
+buffered I/O by grabbing many bytes at the first request and keeping them in
+memory to prepare for and optimmize future requests.
+
+2.)
+tr2u.c is exactly the same, except for the way in which we handle STDIN and STDOUT.
+We use directly read(...) and write(...) one byte at a time. This switches to kernel
+mode every byte, which is an arduous process as this requires saving the CPU state
+and switching over to kernel mode, performing the operation, and switching the state
+back (which seems like a needlessly excessive process).
+
+One thing to note is that this code needed to use an unsigned char to take the value
+returned. This keeps our indexing consistent to how the table I constructed works.
+
+3.)
+For the following tests, I downloaded a Lorem Ipsum file and expanded it to
+approximately 8.7 Mb.
+
+(a)
+We use strace to compare the system calls issued by tr2b and tr2u when copying one
+file to another.
+
+cat lorem.txt | strace -c ./tr2b "a" "z" > test1.txt
+
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 43.30    0.000226           2       133           write
+ 29.89    0.000156           0      2127           read
+  9.20    0.000048           5         9           mmap
+  4.79    0.000025           6         4           mprotect
+  2.87    0.000015           8         2           open
+  2.87    0.000015           4         4           fstat
+  1.92    0.000010          10         1           munmap
+  1.34    0.000007           7         1         1 access
+  1.34    0.000007           7         1           execve
+  1.15    0.000006           3         2           close
+  0.77    0.000004           4         1           brk
+  0.57    0.000003           3         1           arch_prctl
+------ ----------- ----------- --------- --------- ----------------
+100.00    0.000522                  2286         1 total
+
+There are only 133 calls to write and 2127 to read, which is what we expect. getchar()
+and putchar() use buffered I/O, so those calls use a lot of memory in a temporary buffer
+to increase access time to STDIN and STDOUT. That is why the number of calls is
+significantly smaller than the number of bytes.
+
+cat lorem.txt | strace -c ./tr2u "a" "z" > test1.txt
+
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 56.06    9.529075           1   8702210           write
+ 43.94    7.469288           1   8702212           read
+  0.00    0.000047           7         7           mmap
+  0.00    0.000023           6         4           mprotect
+  0.00    0.000015           8         2           open
+  0.00    0.000009           9         1           munmap
+  0.00    0.000007           4         2           close
+  0.00    0.000007           7         1         1 access
+  0.00    0.000006           3         2           fstat
+  0.00    0.000006           6         1           execve
+  0.00    0.000004           4         1           arch_prctl
+  0.00    0.000003           3         1           brk
+------ ----------- ----------- --------- --------- ----------------
+100.00   16.998490              17404444         1 total
+
+Using the unbuffered method on a file this large yields precisely what we expect as well.
+The amount of time required increased by a factor of roughly 34000, where every single
+byte was requested to be read by write(...) and read(...). This caused at least
+8702210*2 switches to kernel mode due to unbuffered I/O. The percentage of time spent
+reading and writing also proportionally increases relative to the buffered I/O version.
+
+
+(b)
+We now use strace to compare the system calls issued by tr2b and tr2u when copying a file
+to the terminal.
+
+cat lorem.txt | strace -c ./tr2b "a" "z"
+
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 94.22    0.033671           1     28930           write
+  5.21    0.001862           1      2127           read
+  0.17    0.000059          30         2           open
+  0.16    0.000056           6         9           mmap
+  0.08    0.000030           8         4           mprotect
+  0.04    0.000016           4         4           fstat
+  0.03    0.000012          12         1           munmap
+  0.02    0.000008           4         2           close
+  0.02    0.000008           8         1         1 access
+  0.02    0.000006           6         1           execve
+  0.01    0.000004           4         1           brk
+  0.01    0.000004           4         1           arch_prctl
+------ ----------- ----------- --------- --------- ----------------
+100.00    0.035736                 31083         1 total
+
+
+cat lorem.txt | strace -c ./tr2u "a" "z"
+
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 56.66   10.258439           1   8702210           write
+ 43.34    7.846060           1   8702212           read
+  0.00    0.000042           6         7           mmap
+  0.00    0.000028          14         2           open
+  0.00    0.000028           7         4           mprotect
+  0.00    0.000023          23         1           munmap
+  0.00    0.000008           4         2           fstat
+  0.00    0.000008           8         1         1 access
+  0.00    0.000007           4         2           close
+  0.00    0.000006           6         1           execve
+  0.00    0.000005           5         1           brk
+  0.00    0.000003           3         1           arch_prctl
+------ ----------- ----------- --------- --------- ----------------
+100.00   18.104657              17404444         1 total
+
+
+For the tr2b, the same number of calls to read were made, which seems logical since the same file
+is being read, so nothing there is changing. However, there are significantly more
+calls to write, and write now takes up 94.22% of the execution time. This is probably because
+the buffer cannot go past a particular upper bound limit when printing to terminal. This is
+likely due to the fact that the user needs to see the output as it comes out. However when printing
+to file, there is no need for the user to have to see the output, so it will speed along quite swiftly.
+The tr2u output is essentially the same since it is printed byte by byte in both scenarios.
+
+4.)
+The final step is to measure the time difference between the two version of the program. We use
+the same file used in (3) since it is substantially large.
+
+cat lorem.txt | time -p ./tr2b "a" "b"
+
+real 12.31
+user 0.21
+sys 0.09
+
+cat lorem.txt | time -p ./tr2u "a" "b"
+
+real 14.52
+user 0.43
+sys 8.85
+
+The tr2u took a slightly longer real time to finish processing this file. However what is
+most noticeable is the difference in time between the two program's time spent in kernel mode
+(specified by sys). While the buffered I/O version has a value of .09 for sys time, the
+unbuffered I/O version has 9.85 for sys time. This makes sense, since the unbuffered I/O
+version makes many more system calls: one for every single byte that needs to be read,
+and one more for each byte in order to write. The buffered version on the other hand
+uses the sys call to create it's own buffer so that it doesn't have to make the call
+in the future, hence the smaller time.
+

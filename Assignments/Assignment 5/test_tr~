@@ -1,0 +1,14 @@
+#!/bin/bash
+
+head --bytes=5000000 /dev/urandom > output.txt
+./tr2b "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz" < output.txt > test1.txt
+./tr2u "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz" < output.txt > test2.txt
+tr "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz" < output.txt > test3.txt
+./g2 "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz" < output.txt > test4.txt
+
+diff test1.txt test2.txt
+diff test2.txt test3.txt
+diff test1.txt test3.txt
+diff test1.txt test4.txt
+diff test2.txt test4.txt
+diff test3.txt test4.txt

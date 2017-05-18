@@ -1,0 +1,162 @@
+Firstly I went through the generic programming which required making the tr2b
+and tr2u files. I wrote the tr2b file using putchar() and getchar() which
+required multiple steps.
+
+1) Checking if the from and to were the same sizes using strlen() 2) Checking if
+there are multiple characters in the from string using an array method 3) Going
+through every getchar() character 'ch' and getting the array position in from
+(if present) 4) If position returned, print appropriate index in to 5)
+Otherwise, print the character itself using putchar()
+
+I created the same C file and changed the appropriate getchar() and putchar() to
+read() and write() with the number of bytes as 1 to read single bytes at a time.
+
+The next step was to compare the performances of the two programs.
+
+I created a 5.22MB file using Lorem Ipsum which outputs a random array of
+characters of a given number of bytes. Then I tested:
+
+(a) FOR TR2B
+
+cat test.txt | strace -c ./tr2b "a" "b">test1.txt
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+  0.00    0.000000           0      1340         read
+  0.00    0.000000           0        84           write
+  0.00    0.000000           0         2            open
+  0.00    0.000000           0         2            close
+  0.00    0.000000           0         4            fstat
+  0.00    0.000000           0        11           mmap
+  0.00    0.000000           0         3            mprotect
+  0.00    0.000000           0         2            munmap
+  0.00    0.000000           0         3            brk
+  0.00    0.000000           0         1         1 access
+  0.00    0.000000           0      1305        mremap
+  0.00    0.000000           0         1            execve
+  0.00    0.000000           0         1            arch_prctl
+------ ----------- ----------- --------- --------- ----------------
+100.00    0.000000                  2759         1 total
+
+FOR TR2U
+
+cat test.txt | strace -c ./tr2u "a" "b">test1.txt
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 59.07    0.604628           0   5476963           write
+ 40.91    0.418762           0   5476965           read
+  0.01    0.000129           0      1305           mremap
+  0.00    0.000012           4         3           brk
+  0.00    0.000000           0         2           open
+  0.00    0.000000           0         2           close
+  0.00    0.000000           0         2           fstat
+  0.00    0.000000           0         9           mmap
+  0.00    0.000000           0         3           mprotect
+  0.00    0.000000           0         2           munmap
+  0.00    0.000000           0         1         1 access
+  0.00    0.000000           0         1           execve
+  0.00    0.000000           0         1           arch_prctl
+------ ----------- ----------- --------- --------- ----------------
+100.00    1.023531              10955259         1 total
+
+This makes sense since the unbuffered tr function doesn't optimize the use of
+buffers to read and write characters. While the other rows are the same, the
+main difference comes from the read and write system calls. While tr2u.c makes
+5476963 system write calls for each character, tr2b.c adds the characters to a
+buffer and then makes only 84 calls of this buffer.
+
+(b) FOR TR2B
+
+cat test.txt | strace -c ./tr2b "a" "b"
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 83.71    0.001285           0     17693           write
+  9.19    0.000141           0      1340           read
+  7.10    0.000109           0      1305           mremap
+  0.00    0.000000           0         2           open
+  0.00    0.000000           0         2           close
+  0.00    0.000000           0         4           fstat
+  0.00    0.000000           0        11           mmap
+  0.00    0.000000           0         3           mprotect
+  0.00    0.000000           0         2           munmap
+  0.00    0.000000           0         3           brk
+  0.00    0.000000           0         1         1 access
+  0.00    0.000000           0         1           execve
+  0.00    0.000000           0         1           arch_prctl
+------ ----------- ----------- --------- --------- ----------------
+100.00    0.001535                 20368         1 total
+
+cat test.txt | strace -c ./tr2u "a" "b"
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 58.41    0.397012           0   5476963           write
+ 41.57    0.282560           0   5476965           read
+  0.02    0.000129           0      1305           mremap
+  0.00    0.000000           0         2           open
+  0.00    0.000000           0         2           close
+  0.00    0.000000           0         2           fstat
+  0.00    0.000000           0         9           mmap
+  0.00    0.000000           0         3           mprotect
+  0.00    0.000000           0         2           munmap
+  0.00    0.000000           0         3           brk
+  0.00    0.000000           0         1         1 access
+  0.00    0.000000           0         1           execve
+  0.00    0.000000           0         1           arch_prctl
+------ ----------- ----------- --------- --------- ----------------
+100.00    0.679701              10955259         1 total
+
+Again, the same reasoning stands true for the difference between the system
+calls of tr2b and tr2u. However, an interesting observation is that the tr2b
+uses more system calls to print to terminal than to save to a file. The read
+calls remain the same which makes sense since the same number of characters are
+read (holds true for tr2u too). However, the tr2b program uses more write
+calls. This is probably because the buffer cannot exceed a certain limit when
+printing to the terminal as the user needs to see the output as it comes out. In
+contrast, while printing to a file, the program can print as many characters as
+possible at the same time without the issue of the user not understanding the
+output or following it. This doesn't change the tr2u output as it is printed
+byte by byte in both cases.
+
+The last step was to measure the difference in time between the two
+programs. After trying on a small file, the difference was
+unnoticeable. Therefore, I repeated the process on a 400KB and then 5.22MB file
+to get the following results.
+
+400kB file:
+Command used: cat test2.txt | time -p ./tr2b "a" "b"
+
+   TR2B	      	    TR2U
+real 0.04     	  real 0.44
+user 0.02	  user 0.02
+sys 0.00	  sys 0.41
+
+real 0.04	  real 0.44
+user 0.01	  user 0.02
+sys 0.02	  sys 0.40
+
+real 0.03	  real 0.42
+user 0.01	  user 0.02
+sys 0.01	  sys 0.39
+
+The difference is large and noticeable. Most of the difference comes from the
+sys part of the time which indicates the time taken for system calls. The
+unbuffered program makes many more calls (as shown before) and therefore takes
+much more time than the buffered program.
+
+5.22MB File:
+Command used: cat test.txt | time -p ./tr2u "a" "b"
+
+    TR2B       TR2U
+real 29.19   real 28.41
+user 0.32    user 0.37
+sys 0.04     sys 7.00
+real 29.18   real 27.64
+user 0.35    user 0.42
+sys 0.05     sys 6.82
+real 27.23   real 27.59
+user 0.38    user 0.35
+sys 0.06     sys 6.89
+
+The difference between the real times is not significant and varies a
+lot. However, we can see again that the main difference comes from the time
+taken for system calls. The buffered program takes an average of 0.05seconds
+whereas the unbuffered takes an average of 6.90seconds to make system calls.
