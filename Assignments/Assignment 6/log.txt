@@ -1,0 +1,88 @@
+LABORATORY		SHAAN MATHUR ID: 904606576
+
+First we have to make sure that we have the correct PATH.
+We can run the command
+
+echo $PATH
+
+to see what it is currently set as. To add /usr/local/cs/bin
+to our PATH, we run the command:
+
+export PATH=/usr/local/cs/bin:$PATH
+
+
+We then check the version of sort
+
+sort --version
+
+Which outputs that we are using sort (GNU coreutils) 8.26
+
+If we also check which sort program we are using:
+
+which sort
+
+We are indeed using the version at
+
+/usr/local/cs/bin/sort
+
+
+Knowing this, we can now attempt to generate the 10,000,000
+random double-precision floating point numbers. We make each
+of the floating point numbers 8 bytes long. Using the od
+command, we can generate a file random.txt with these requirements
+as so:
+
+od -An -t f8 -N 80000000 < /dev/urandom | tr -s ' ' '\n' > rand.txt
+
+The flags are used for the following
+
+-An is used to specify that the offset shall not be written
+-t f8 is used to select double-precision floating point format
+/dev/urandom is the file that generates the pseudorandom numbers
+-N 80000000 limits the dump to 80000000 input bytes
+
+The use of tr is also used to replace the spaces with newline characters.
+
+There is an initial empty line in the generated rand.txt, which we
+remove using
+
+sed -i '1d' random.txt
+
+Now we wish to check the performance differences of sorting using varying
+number of threads
+
+Without Parallelism
+time -p sort -g rand.txt > /dev/null
+real 35.70
+user 199.02
+sys  .57
+
+With one thread
+time -p sort -g --parallel=1 rand.txt > /dev/null
+real 185.54
+user 185.20
+sys  .23
+
+With two threads
+time -p sort -g --parallel=2 rand.txt > /dev/null
+real 102.42
+user 197.52
+sys  .47
+
+With four threads
+time -p sort -g --parallel=4 rand.txt > /dev/null
+real 64.08
+user 210.63
+sys  .65
+
+With eight threads
+time -p sort -g --parallel=8 rand.txt > /dev/null
+real 45.21
+user 213.34
+sys .49
+
+Multithreading approach does indeed seem to speed up the real time performance.
+However this likely does not continue to increase indefinitely as we add more threads.
+We only have a limited amount of cores, and we also know by Amdahl's Law that trying
+to overoptimize one component of a piece of software can only provide a limited
+overall optimization.

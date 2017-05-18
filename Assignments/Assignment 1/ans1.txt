@@ -1,0 +1,172 @@
+LABORATORY
+
+1.) 
+m a n SP m a n
+
+
+man -K "hello"   
+#replace "hello" with "<search string>"
+
+2.)
+w h i c h SP c p
+w h i c h SP w c
+
+cp:
+/usr/local/cs/bin/cp
+wc:
+/usr/local/cs/bin/wc
+
+3.) 
+Most programs are stored in usr/bin. So
+
+c d SP /
+c d SP u s r / b i n
+f i n d SP - n a m e SP " ? " SP - e x e c u 
+t a b l e
+
+output:
+./[
+./w
+./X
+
+m a n SP [
+m a n SP w
+m a n SP X
+
+
+
+[ is part of the shell builtin test
+
+w shows who is logged on and what they are doing
+
+X is really the "X server." It essentially controls 
+the GUI.
+It was originally designed for Unix OS running on 
+x86 hardware.
+
+
+4.)
+l s SP - l SP - X SP | SP h e a d SP - n SP 5 0 0
+
+/etc/alternatives/emacs
+
+5.)
+m a n SP c h m o d 
+
+g+s will, for other users in the file's group, set 
+user or group ID on execution
+o-x will, for other users not in the file's group, 
+remove the ability to execute it
+
+6.)
+m a n SP f i n d
+
+f i n d SP . SP - m t i m e SP - 2 1
+
+7.)
+c d SP /
+f i n d SP - m t i m e SP - 2 1 SP - t y p e SP d
+
+These are examples of directories that have been 
+modified in the last three weeks.
+
+/u/be/fac
+/u/be/grad
+/u/be/staff
+/u/be/ugrad
+/u/bm/class/cs186
+/u/ce/class/ce147
+/u/ce/class/ce151
+/u/ce/class/ce235b
+/u/ce/class/ce250b
+/u/ce/class/ce20
+/u/ce/class/ce244
+/u/ce/grad
+/u/ce/staff
+/u/ce/ugrad
+/u/ch/class/ch108a
+/u/ch/grad
+/u/ch/staff
+/u/ch/ugrad
+/u/cs/class
+/u/cs/class/cs111
+/u/cs/class/cs131
+/u/cs/class/cs188
+/u/cs/class/cs33
+/u/cs/class/cs35l
+/u/cs/class/cs259u
+
+
+8.)
+w h i c h SP f i n d
+c d SP / u s r / b i n 
+f i n d SP - t y p e SP l SP | SP w c SP - l
+
+247 symbolic links
+
+9.)
+m a n SP l s
+c d SP / u s r / l i b 
+l s SP - l SP - t 
+
+libfreeblpriv3.so Dated: June 28 2016
+
+10.)
+m a n SP l o c a l e d e f
+
+The current locale environment is the source 
+of data to standard output from enviornment
+variables begining with LC_* like LC_TIME, 
+LC_NUMERIC, LC_MONETARY, LC_CTIME, and LC_MESSAGES.
+
+11.)
+C-h a s o r t Enter
+
+Buffer-menu-sort
+sort-columns
+sort-fields
+sort-lines
+sort-numeric-fields
+sort-pages
+sort-paragraphs
+sort-regexp-fields
+tabulated-list-col-sort
+tabulated-list-sort
+
+12.)
+
+C-M-a : Moves to the beginning of the defined function
+C-M-b : Move back over the next s expression
+C-M-c : Exit recursive editing level
+C-M-d : Go down a level of parentheses
+C-M-e : Go to end of defined function
+C-M-f : Go forward over the next s expression
+C-M-g : Not defined
+C-M-h : Creates a region around current defined func.
+
+13.)
+C-g exits whatever operation is currently being done. 
+For instance if one is highlighting
+something with C-SP, one can stop by pressing C-g.
+
+14.)
+Yank pastes back text that was previously killed/cut.
+
+15.)
+e m a c s Enter
+C-x d Enter M-< C-SP M-> M-w C-x b * s c r Tab Enter 
+C-SP M-< Backspace C-y C-x C-s ~ / D o c Tab C S 3 5 
+Tab / t e s t . t x t Enter
+
+C-x C-c
+l s - l >~ / D o c Tab / C S 3 5 Tab / t e s t 2 . t x t 
+Enter
+
+c d ~ / D o c Tab / C S 3 5 Tab Enter
+d i f f SP - u SP - w SP t e s t . t x t SP t e s t 2 . 
+t x t SP > t e s t . d i f f Enter
+c a t t e s t . d Tab Enter
+
+ls -l does not seem to have the . and .. directories. dired 
+also only color codes the links blue, whereas
+ls also color codes regular files with green.

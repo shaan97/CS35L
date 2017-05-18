@@ -1,0 +1,174 @@
+SHAAN MATHUR	UID: 904606576
+
+LABORATORY
+
+To download the file, we use the wget command on the linux server in
+tandem with a tar command to unzip the file.
+
+wget http://web.cs.ucla.edu/classes/winter17/cs35L/assign/coreutils-with-bug.tar.gz
+tar -xvzf coreutils-with-bug.tar.gz
+
+Changing directories into the folder created "coreutils-with-bug"
+
+cd coreutils-with-bug
+
+I proceed to attempt to configure and make coreutils.
+
+./configure
+make
+
+The configure step results in a large assortment of messages where the system is
+checking the existance of particular files/structs, etc. The latter then attempts
+to compile all the program code and creates executables in current directory.
+
+However, make fails, due to an error caused by conlicting types for the symbol
+futimens. In utimens.h, the declaration is
+
+int futimens (int, char const *, struct timespec const [2]);
+
+While in utimecmp.c there is the declaration
+
+extern int futimens (int __fd, const struct timespec __times[2]) __THROW
+
+This conflict thus prevents make from fully executing.
+
+
+
+Now we try again, except using the patch provided. We download the file in the
+same manner:
+
+wget http://web.cs.ucla.edu/classes/winter17/cs35L/assign/coreutils.diff
+
+And patch using the -p0 flag since no directories need to be ignored.
+
+patch -p0 < coreutils.diff
+
+The following files were patched:
+
+lib/utimens.c
+lib/utimens.h
+src/copy.c
+src/tee.c
+src/touch.c
+
+Now we retry configuring and making:
+
+./configure
+make
+
+This completes successfully this time. This is because tee was renamed to
+coreutils_tee and futimens was renamed to coreutils_futimens. This got
+rid of the symbol conflicts that occurred previously.
+
+REPRODUCING THE BUG
+
+Inspired by the specifications for this project, the following string of commands
+were used to reproduce the bug.
+
+tmp=$(mktemp -d)
+cd $tmp
+
+This creates a temporary directory for us to see the bug.
+
+touch -d '1918-11-11 11:00 GMT' wwi-armistice
+touch now
+sleep 1
+touch now1
+
+We now have created three files with three different time stamps. One is on
+November 11, 1918 at 11:00 GMT (wwi-armistice) and the other two are at the
+current time with an approximate 1 second difference ('now' being earlier
+than 'now1'). 
+
+cd ~/Documents/CS35L/Assignment-4/coreutils-with-bug/src
+./ls -lt --full-time $tmp
+
+We now use the ls in the buggy coreutils to output the content of the temporary
+directory:
+
+-rw-r--r-- 1 shaan csugrad 0 1918-11-11 03:00:00.000000000 -0800 wwi-armistice
+-rw-r--r-- 1 shaan csugrad 0 2017-02-13 00:18:04.442854094 -0800 now1
+-rw-r--r-- 1 shaan csugrad 0 2017-02-13 00:17:56.885652296 -0800 now
+
+Notice that the files are not ordered properly, since the earliest file, wwi-armistice,
+is placed where the most recent files are. The proper ordering should have now1, now,
+and then wwi-armistice if listed by most recent.
+
+FINDING THE BUG
+
+Delving into the ls.c source file, I found that the source of comparisons in the sorting
+derived from a function called timespec_cmp. The source code looked as so:
+
+timespec_cmp (struct timespec a, struct timespec b)
+{
+	int diff = a.tv_sec - b.tv_sec;
+	return diff ? diff : a.tv_nsec - b.tv_nsec;
+}
+
+Examining more closely with GDB, I use the command
+
+$ gdb --args ls -lt --full-time $tmp
+
+which begins gdb with the appropriate arguments,
+ 
+(gdb) b timespec_cmp
+(gdb) r
+
+which sets the breakpoint at the function of interest and runs the program. I repeatedly
+use
+
+(gdb) info registers
+
+to keep track of the state of the registers at this point. What I notice is an integer
+overflow in the diff variable, which seems to be the reason that the sorting fails. Thus
+to fix the code, we need to create a patch that changes the size of the integer representation
+(preferably to a long long int) and takes care of this overflow issue. To do this I copied
+the timespec.h file from coreutils-with-bug/lib/timespec.h and made my own adjustments.
+I then used the following to generate the appropriate diff file:
+
+diff -u coreutils-with-bug/lib/timespec.h timespec-fix.h > lab4.diff
+
+Now we can apply the patch and configure/make:
+
+patch -p1 lab4.diff
+
+NOTE: THE P1 FLAG IS USED FOR THE PATCH IN THE DIRECTORY HOLDING THE coreutils-with-bug DIRECTORY.
+Then we configure and make:
+
+cd coreutils-with-bug
+./configure
+make
+
+And reinvoke the bug:
+
+cd src
+./ls -lt --full-time $tmp
+
+The correct output is now shown:
+
+-rw-r--r-- 1 shaan csugrad 0 2017-02-13 00:18:04.442854094 -0800 now1
+-rw-r--r-- 1 shaan csugrad 0 2017-02-13 00:17:56.885652296 -0800 now
+-rw-r--r-- 1 shaan csugrad 0 1918-11-11 03:00:00.000000000 -0800 wwi-armistice
+
+SEASNET SERVER
+
+Performing the same test on the home directory of the SEASNET servers:
+
+touch -d '1918-11-11 11:00 GMT' wwi-armistice
+touch now
+sleep 1
+touch now1
+TZ=UTC0 ls -lt --full-time wwi-armistice now now1
+
+We have the output:
+
+-rw-r--r-- 1 shaan csugrad 0 2054-12-17 17:28:16.000000000 +0000 wwi-armistice
+-rw-r--r-- 1 shaan csugrad 0 2017-02-13 10:53:44.243302000 +0000 now1
+-rw-r--r-- 1 shaan csugrad 0 2017-02-13 10:53:37.850156000 +0000 now
+
+Now the wwi-armistice file seems to be in the future! This is because the file system for
+SEASNET uses 4 byte unsigned time stamps while the local file system on the linux server uses
+a signed 4 byte time stamp. Thus negative values would be seen as highly positive (due to
+how two's complement works). Thus touching wwi-armistice on the SEASNET file system will
+result in a time stamp of 2054. We would have to touch the file on the local system to
+prevent this issue from occurring.

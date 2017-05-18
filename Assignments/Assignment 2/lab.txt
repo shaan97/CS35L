@@ -1,0 +1,201 @@
+LABORATORY 2 -- SHAAN MATHUR ID: 904606576
+
+After logging on to the linux server, I entered the command
+
+locale
+
+which outputted
+
+LANG=en_US.UTF-8
+LC_CTYPE="en_US.UTF-8"
+LC_NUMERIC="en_US.UTF-8"
+LC_TIME="en_US.UTF-8"
+LC_COLLATE="en_US.UTF-8"
+LC_MONETARY="en_US.UTF-8"
+LC_MESSAGES="en_US.UTF-8"
+LC_PAPER="en_US.UTF-8"
+LC_NAME="en_US.UTF-8"
+LC_ADDRESS="en_US.UTF-8"
+LC_TELEPHONE="en_US.UTF-8"
+LC_MEASUREMENT="en_US.UTF-8"
+LC_IDENTIFICATION="en_US.UTF-8"
+LC_ALL=
+
+Entering
+
+export LC_ALL='C'
+locale
+
+Outputted, with the exception of LANG, everything changed to the value
+"C".
+
+
+To download the HTML of the CS35L page, I used the command
+
+wget http://web.cs.ucla.edu/classes/winter17/cs35L/assign/assign2.html
+
+which automatically stored it all into a file named assign2.html. I then
+ran the following tests.
+
+
+1.) cat assign2.html | tr -c 'A-Za-z' '[\n*]'
+
+This output all letters in the HTML that were from the English alphabet,
+case insensitive. It replaced any non-alphabetical character with a new
+line. Every English alphabetical word featured its own line.
+
+2.) cat assign2.html | tr -cs 'A-Za-z' '[\n*]'
+
+This, like the previous command, took all letters not in the English alphabet
+and replaced them with a new line. However, it also took all new lines that
+were consecutive to each other and merged them into only one new line. In
+consequence, all English alphabetical words were printed on consecutive lines,
+as opposed to being spaced out.
+
+3.) cat assign2.html | tr -cs 'A-Za-z' '[\n*]' | sort
+
+Expanding upon the previous command, the consequent list of English alphabetical
+words were now sorted in lexicographical order, of course only featuring
+letters from the English alphabet.
+
+4.) cat assign2.html | tr -cs 'A-Za-z' '[\n*]' | sort -u
+
+Expanding further on the previous command, this lexicographically sorted list of
+words also removes duplicates, so every word is unique (hence the flag -u for 
+--unique).
+
+5.) cat assign2.html | tr -cs 'A-Za-z' '[\n*]' | sort -u | comm - words
+
+This command takes what is printed to STDOUT by the previous command and pipes it
+to comm, which compares it to the words file and outputs all words unique to
+both files. 
+
+6.) cat assign2.html | tr -cs 'A-Za-z' '[\n*]' | sort -u | comm -23 - words
+
+This command essentially takes all the English alphabetical words from assign2.html
+and outputs all words that do not appear in our words file. It serves as a means of
+checking to see if these words are words that appear in our English dictionary.
+
+HAWAIIAN WORDS
+
+To begin I downloaded the HTML for the Hawaiian dictionary via
+
+wget http://mauimapp.com/moolelo/hwnwdseng.htm
+
+I proceeded to incrementally process and pipe and repeat until I was able to isolate
+the Hawaiian words in sorted order.
+
+First I noticed that all the words were between the tags <td> and </td>. Thus I wanted
+to write a regular expression that would describe "text between the tags <td> and </td>.
+Using that expression in grep, I creted
+
+grep -w -P '(?<=<td>).+\s*(?=<\/td>)'
+
+To make sure the processing is clean, I wanted to make sure every word was also on a new
+line. Thus if two tags are next to each other such that they are of the form
+
+<td>English</td>  <td>Hawaiian>
+
+Then I should space it to
+
+<td>English</td>
+<td>Hawaiian</td>
+
+Consequently I used a substitution via sed, and created a regular expression to describe
+the substitution of a \n character between a closing and opening <td> tag if and only if
+there is not a new line already separating them. Thus,
+
+sed "s/<\/td>.*<td>/\ng"
+
+Then I remove all of the tags
+
+sed 's/<[^>]*>//g'
+
+And grab only the even lines (in which the Hawaiian words will be, since English words
+and Hawaiian words alternate).
+
+awk 'NR % 2 == 0'
+
+We then replace the ` character with '
+
+sed "s/\`/'/g"
+
+Now if the dictionary has entries that are multiple words, we want to separate them into
+distinct Hawaiian word entries.
+
+sed "s/ /\n/g"
+
+We make sure every entry is only separated by one new line character by squeezing them
+together, via a tr
+
+tr -s "\n"
+
+And we also want our list of words to be lower case, another opportunity to use tr
+
+tr  [:upper:] [:lower:]
+
+Earlier we separated words. There may be some unwanted punctuation, so we remove that as
+well.
+
+sed "s/[,?]//g"
+
+Now we eliminate any word not within our defined Hawaiian alphabet, and sort.
+
+sed -r "s/.*[^pk'm\nwlhaeiou].*//g" | sort -u
+
+As it turns out, piping all this together does the trick. However there are a few blank
+lines in the beginning, so we just want to remove them.
+
+sed "/^$/d"
+
+The final command pipes all of these together to achieve our desired effect.
+
+cat - |
+grep -w -P '(?<=<td>).+\s*(?=<\/td>)' |
+sed "s/<\/td>.*<td>/\ng" |
+sed 's/<[^>]*>//g' |
+awk 'NR % 2 == 0' |
+sed "s/\`/'/g" |
+sed "s/ /\n/g" |
+tr -s "\n" |
+tr  [:upper:] [:lower:] |
+sed "s/[,?]//g" |
+sed -r "s/.*[^pk'm\nwlhaeiou].*//g" | 
+sort -u |
+sed "/^$/d"
+
+
+
+SPELL CHECKING
+
+To spell check a website using our program, we can just use the output of buildwords
+in place of the English dictionary generated earlier (while also making everything
+lower case).
+
+Assuming the output of buildwords has been put into hwords,
+
+cat assign2.html | tr -cs 'A-Za-z' '[\n*]' | 
+tr "[:upper:]\`" "[:lower:]'" | sort -u | comm -23 - hwords
+
+where assign2.html is the HTML for the Assignment 2 web page. Piping with wc -l gives
+a misspelled word count of 406 words (ex. against, buildwords, type, the, their).
+
+Using the expression we came up with earlier with words, we have a misspelled word
+count of 39 (ex. basedefs, html, idx, eggert). 
+
+To find words misspelled in English but not in Hawaiian, we get the list of mispelled
+English words and pipe it to see whats common with the Hawaiian words:
+
+cat assign2.html | tr -cs 'A-Za-z' '[\n*]' | tr "[:upper:]\`" "[:lower:]\'" |
+sort -u | comm -23 - words | comm -12 - hwords
+
+This yields 3 words that are misspelled in English but not in Hawaiian: halau, lau,
+and wiki.
+
+To find words misspelled in Hawaaian but not in Hawaiian, we perform an analagous
+command:
+
+cat assign2.html | tr -cs 'A-Za-z' '[\n*]' | tr "[:upper:]\`" "[:lower:]\'" |
+sort -u | comm -23 - hwords | comm -12 - words
+
+There are 370 words misspelled in Hawaaian but not in English (ex. use, word, work).
