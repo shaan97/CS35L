@@ -1,0 +1,19 @@
+#! /bin/sh
+
+words=`ls /usr/bin | awk 'NR%101==904606576%101'`
+echo > output.txt
+for word in $words:
+do
+    words2=`ldd /usr/bin/$word`
+    IFS=$'\n'
+    for word2 in $words2:
+    do
+	echo $word2 >> detect.txt
+	echo $word2 | cut -f1 - >> output.txt
+	echo >> output.txt
+    done
+    
+    echo >> output.txt
+done
+sort -u output.txt > final_output.txt
+
