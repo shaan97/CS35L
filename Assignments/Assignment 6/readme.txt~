@@ -1,0 +1,61 @@
+README
+
+Upon first glance of the program, I noticed that we had a large bottleneck in the
+main function in which we have 4 nested for loops running calculations on every
+pixel. The work done on a single pixel does not, however, affect the outcome
+of the work done on another pixel. They are all in fact different. Thus there
+seems to be an obvious ("embarassingly parallel") way to parallelize this
+software. Instead of having one thread work on all the pixels, we can have
+multiple threads work on a partition of the pixels.
+
+Our particular method of partioning the pixels involves dividing the pixels into
+nthread columns, where nthread is the number of threads we have currently. Each
+thread would work on their own column, thus preventing any race conditions since
+every pixel is independent of the other. So even though there are really 4
+for loops, we only need to parallelize the outer most loop.
+
+One issue was trying to figure out how precisely to parallelize the loop. The
+solution I chose was to go from column X to column (X + width / nthreads). Doing
+this also gave nice microptimizations with cache hits since we have more spatial
+locality in our accesses (we are incrementing our counter from column X to column
+(X + width/nthreads) only by one every iteration).  
+rm -f *.o *.tmp 1-test.ppm 2-test.ppm 4-test.ppm 8-test.ppm srt srt.tgz
+gcc -std=gnu99 -g -O2 -Wall -Wextra -Wno-unused-parameter   -c -o main.o main.c
+main.c: In function 'thread_func':
+main.c:182:15: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
+   int begin = (int) arg;
+               ^
+main.c: In function 'main':
+main.c:271:60: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+       status = pthread_create(&pids[i], NULL, thread_func, (void*) pxl_t[i]);
+                                                            ^
+gcc -std=gnu99 -g -O2 -Wall -Wextra -Wno-unused-parameter   -c -o raymath.o raymath.c
+gcc -std=gnu99 -g -O2 -Wall -Wextra -Wno-unused-parameter   -c -o shaders.o shaders.c
+gcc -std=gnu99 -g -O2 -Wall -Wextra -Wno-unused-parameter -o srt main.o raymath.o shaders.o -lm -lpthread
+time ./srt 1-test.ppm >1-test.ppm.tmp
+
+real	0m54.284s
+user	0m54.268s
+sys	0m0.001s
+mv 1-test.ppm.tmp 1-test.ppm
+time ./srt 2-test.ppm >2-test.ppm.tmp
+
+real	0m27.562s
+user	0m53.422s
+sys	0m0.002s
+mv 2-test.ppm.tmp 2-test.ppm
+time ./srt 4-test.ppm >4-test.ppm.tmp
+
+real	0m18.580s
+user	0m55.180s
+sys	0m0.001s
+mv 4-test.ppm.tmp 4-test.ppm
+time ./srt 8-test.ppm >8-test.ppm.tmp
+
+real	0m12.771s
+user	0m55.799s
+sys	0m0.003s
+mv 8-test.ppm.tmp 8-test.ppm
+for file in 1-test.ppm 2-test.ppm 4-test.ppm 8-test.ppm; do \
+  diff -u baseline.ppm $file || exit; \
+done
