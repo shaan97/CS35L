@@ -1,0 +1,61 @@
+HOMEWORK			Shaan Mathur	ID:904606576
+
+I begin by switching to a branch with version 3. We will
+call it quote
+
+git checkout v3.0 -b quote
+
+I then apply the patch we generated in the lab:
+
+patch -p1 < ./quote-3.0-patch.txt
+
+
+Now after studying how to use the Emacs function, I change
+the long entry to file ChangeLog. There were six files
+in total that needed to be changed.
+
+emacs
+C-x 4 a
+
+For each file I said
+The character '`' is kept in the comments.
+
+I commited the changes to this branch quote by staging
+them all quickly using
+
+git add .
+
+and then committing with
+
+git commit -F ChangeLog
+
+I could then generate the file formatted-patch.txt
+
+git format-patch -1 --stdout > formatted-patch.txt
+
+
+I then exchanged the formatted-patch.txt with a partner,
+and checked out version 3.0 again in a temporary branch
+called partner
+
+git checkout -f v3.0
+git checkout -b partner
+
+Then I just applied my partner's patch:
+
+git am < ../formatted-patch.txt
+
+I then just made sure everything worked using the same
+method used in the lab:
+
+./bootstrap
+./configure
+make
+make check
+
+And I verified tha tthe ChangeLog entry was indeed
+there using:
+
+make distdir
+
+and going to the directory diffutils-3.0.1

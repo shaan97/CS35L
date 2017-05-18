@@ -1,0 +1,138 @@
+LABORATORY			Shaan Mathur	ID:904606576
+
+First we make sure to have access to git by modifying
+our PATH variable as so
+
+export PATH=/usr/local/cs/bin:$PATH
+
+Now we clone diffutils into a new directory that we name
+gitroot:
+
+mkdir gitroot
+git clone git://git.savannah.gnu.org/diffutils.git
+
+Changing directories into diffutils, we get the git log
+and git tag.
+
+cd diffutils
+git log > git-log.txt
+git tag > git-tag.txt
+
+Now I use the commands
+
+git log | less
+
+and search for the commit message:
+
+"maint: quote 'like this'..."
+
+Finding the hash value, we can use git show to get the
+diff patch file we need:
+
+git show 62ca21c8c1 > quote-patch.txt
+
+Now that we have this path, we want to check out diffutils
+version 3.0:
+
+git chckout v3.0
+
+We can now apply the patch using the patch command with -p1
+
+patch -p1 < quote-patch.txt
+
+We can then check the status of our unstaged, staged, and
+untracked files using:
+
+git status
+
+Now that we know the modified files, we can go one by one
+and either revert the changes if it is not a .c file or
+revert changes done to anything not in the code (aka comments)
+for the .c files.
+
+For non .c files: C-x v u yes RET
+For .c files: C-x v =
+
+    If we wish to undo the current CHUNK if it is a change
+    in a comment:
+
+	      C-u C-c C-a
+    Else:
+	      M-n
+
+
+After this is complete, we can look at the rejected patches
+and apply them manually. These files are
+
+src/diff.c.rej
+src/diff3.c.rej
+
+These patches could not be applied, so I just opened the files
+myself and went to the appropriate lines, made the appropriate
+changes, and saved.
+
+
+Now we remove the untracked files:
+
+git clean -f
+
+And save a patch including now all current changes into the
+file quote-3.0-patch.txt
+
+git diff > quote-3.0-patch.txt
+
+Now we build to make sure that everything is working properly:
+
+./bootstrap
+./configure
+make
+make check
+
+And now we verify:
+
+diff . -
+
+Outputs:
+diff: cannot compare '-' to a directory
+
+So it does use the correct ' instead of `.
+
+diff --help
+
+Outputs:
+...
+FILES are 'FILE1 FILE2' or 'DIR1 DIR2' or...
+...
+
+And it uses the correct ' here instead of ` again.
+
+
+Now for a final sanity test, I compared the source code of the
+version I modified against the source code of Diffutils 3.0.
+
+I made the following two directories:
+
+mkdir diffutils-3.0
+mkdir diffutils-3.0-patch
+
+Then I entered the src directory and copied the source code
+into the patch directory:
+
+cp * ../diffutils-3.0-patch
+
+I checked out v3.0 and copied the source code of that version
+(which is unmodified) into diffutils-3.0
+
+git checkout -f v3.0
+cp * ../diffutils-3.0
+
+Now we compare the source codes and output into a text file:
+
+diffutils-3.0-patch/diff -pru diffutils-3.0 diffutils-3.0-patch
+	> quote-3.0-test.txt
+
+Now we compare the two patches and find the differences. It turns
+out that they are only for string literals, which is an innocuous
+difference.
+
+diff quote-3.0-patch.txt quote-3.0-test.txt

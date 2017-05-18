@@ -1,0 +1,170 @@
+1. 
+Firstly I made sure I had git installed. git was present in /usr/local/cs/bin. 
+Nextly, I made a new directory to store my diffutils in: 
+
+mkdir gitroot
+cd gitroot
+git init 
+git clone git://git.savannah.gnu.org/diffutils.git
+
+The last git clone command was used to download the diffutils repository from the main Savannah repository. 
+
+2.
+Next to find the log of changes made to this repository: 
+cd diffutils
+git log > git-log.txt
+
+3.
+Similarly for getting the tags we do:
+git tag > git-tags.txt
+
+4.
+To find the patch we first open the git-logs.txt
+emacs git-logs.txt
+Then we search for the phrase "maint: quote" using C-s and press Enter.
+We copy the commit ID for the patch: 62ca21c8c1a5aa3488589dcb191a4ef04ae9ed4f
+
+Then we go through the man pages for git to search for the appropriate file to make the patch file.
+We get the command:
+
+git show 62ca21c8c1a5aa3488589dcb191a4ef04ae9ed4f > quote-patch.txt 
+
+5.
+To look at a previous commit or version we need to use the git checkout option with the appropriate tag. 
+We look at git-tags.txt and see that the tag we need is "v3.0"
+
+git checkout v3.0
+
+6. After getting into version 3.0 of git, I decided to patch the quote-patch file. 
+
+patch -p1 < quote-patch.txt
+
+A few files did not get patched for which I had to press Enter.
+
+7.
+After the patching process is done I use the git status command to get an overview of what the patch did.
+
+git status 
+
+This prodcued the list of all files that the patch modified:
+modified:   NEWS
+#	    modified:   README
+#	    modified:   TODO
+#	    modified:   doc/diagmeet.note
+#	    modified:   ms/config.bat
+#	    modified:   ms/config.site
+#	    modified:   po/en.po
+#	    modified:   src/analyze.c
+#	    modified:   src/cmp.c
+#	    modified:   src/context.c
+#	    modified:   src/diff.c
+#	    modified:   src/diff.h
+#	    modified:   src/diff3.c
+#	    modified:   src/dir.c
+#	    modified:   src/ifdef.c
+#	    modified:   src/io.c
+#	    modified:   src/sdiff.c
+#	    modified:   src/side.c
+#	    modified:   src/system.h
+#	    modified:   src/util.c
+#	    modified:   tests/help-version
+
+There were also the files that were untracked.
+
+8.
+Used the links provided in the spec to learn about vc-diff, vc-revert. 
+
+9.
+Using what I learnt about vc-diff, I open all the files that are not .c and revert the changes made to them using C-x v u(Revert). 
+Then, I opened all the .c files and reverted changes made to the comments(changes made to comments wont affect the program anyways)
+To do this I used the diff-apply-hunk:
+C-x v = 
+M-n to go to the next hunk
+C-u C-c C-a 
+
+I had to manually check if some changes were made to comments and then undo them. 
+
+10.  Next we need to get into the patches that we ignored earlier and
+accordingly paste them into the respective .c files.
+
+src/diff.c and src/diff3.c are the files into which we need to paste the rejected patches. 
+
+I looked through the .rej files and also through their .c counterpart and logically made the required changes. 
+
+11.
+To remove the Untracked files use
+git clean -f 
+After this doing git status gives:
+
+# Not currently on any branch.
+# Changed but not updated:
+#   (use "git add <file>..." to update what will be committed)
+#   (use "git checkout -- <file>..." to discard changes in working directory)
+#
+#	modified:   NEWS
+#	modified:   src/cmp.c
+#	modified:   src/diff.c
+#	modified:   src/diff3.c
+#	modified:   src/dir.c
+#	modified:   src/sdiff.c
+#	modified:   src/side.c
+#	modified:   src/util.c
+#
+no changes added to commit (use "git add" and/or "git commit -a")
+
+12.
+Now I will use the git diff command to get the patch that holds the changes that we made to diffutils 3.0:
+git diff > quote-3.0-patch.txt
+emacs quote-3.0-patch.txt
+Looking into the file we see about 400 lines of code which is as expected.
+
+13.
+Next, we open README-hacking to learn to build a patch file.
+Initially when I ran ./bootstrap, I got an error: help2man not found.
+To fix this firstly I found help2man in /usr/local/cs/bin/help2man
+So I used
+export PATH=/usr/local/cs/bin:$PATH
+to add help2man to the program path so bootstrap would succesfully run.
+Then:
+./bootstrap
+./configure
+make
+make check
+
+To make sure that diffutils has been updated we try
+diff . -
+which gives us diff: cannot compare '-' to a directory
+Also, we do diff --help in which we see that there are only apostrophe( ' instead of `)
+
+14.
+To do a sanity test all we have to do is compare the src of our modified diffutil and the orginal diffutil v3.0
+Firstly make 2 directories in which we will store the 2 diffutils:
+mkdir diffutils-3.0
+mkdir diffutils-3.0-patch
+
+Then we copy all the src files from our current diffutils into diffutils-3.0
+cp /u/cs/ugrad/yashc/gitroot/diffutils/src/* /u/cs/ugrad/yashc/gitroot/diffutils-3.0
+
+Next
+I make a directory temp-diffutils-3.0 
+git init
+git clone git://git.savannah.gnu.org/diffutils.git 
+git checkout v3.0
+
+We do git clone to get the original diffutils and then go to v3.0 so
+that there no changes that we made, just the original file with the `
+and ' error.
+Similar to before I copied the src folder from
+temp-diffutils-3.0 to diffutils-3.0-patch.
+
+cp /u/cs/ugrad/yashc/gitroot/temp-diffutils-3.0/src/* /u/cs/ugrad/yashc/gitroot/diffutils-3.0-patch
+
+Then
+diffutils/diff -pru diffutils-3.0 diffutils-3.0-patch >quote-3.0-test.txt
+
+15.
+diff quote-3.0-test.txt quote-3.0-patch.txt
+
+This shows the difference between the 2 files. The only differences we
+see are that between ` and ' Thus no significant changes were made to
+diff expect for the change from `` to ''.

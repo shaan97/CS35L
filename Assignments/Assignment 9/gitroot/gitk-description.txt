@@ -1,0 +1,12 @@
+At the top right there is a commit date and varying times for the
+people who made the commits to this repository. The left column
+provides email address and names of the software engineers that
+performed the edits. The top left window has a graphic based list
+that shows the commit history with different branches and merges.
+The top tab thus is really the log of commits in a graphical form.
+
+The main subwindow has a commit message; it contains info about
+previous versions, new versions, different branches. The patch/tree
+options in the right window can be used to view the current
+rree structure and different files altered due to the commit.
+
