@@ -1,0 +1,74 @@
+LABORATORY	SHAAN MATHUR UID: 904606576
+
+In lab, we inserted the provided Ubuntu CD's to run a temporary version
+of Ubuntu. Opening terminal, we want to check if openssh-server and
+openssh-client are installed. To do this we run
+
+dpkg --get-selections | grep openssh
+
+This prints only
+
+openssh-server		install
+
+So we need to install the client as well, which we can do by running
+
+sudo apt-get install openssh-client
+
+Which successfully installs the client as well, which we verify
+by rexecuting the dpkg command with aforementioned arguments and grep.
+
+SERVER SIDE
+First, I used my machine as the server. I execute
+
+ssh-keygen
+
+Which generates the public and private keys. I then created an account
+for my lab partner on this server:
+
+sudo useradd -d /home/lab7 -m shaan
+sudo passwd 1234
+
+This set up an account with username shaan and password 1234.
+Following the optional part of the assignment, we disabled password-
+based authentication by editing the /etc/ssh/sshd_config file. It 
+was not initially READ-WRITE (it was in fact READ-ONLY) so we had to
+chmod the permissions.
+
+chmod +w /etc/ssh/sshd_config
+emacs /etc/ssh/sshd_config
+
+Where the file said "PasswordAuthentication: Yes", we changed it to
+a No. Now the server was set up for a user to ssh in.
+
+CLIENT SIDE
+I used my machine as a client seeking to ssh into a server. I execute
+
+ssh-keygen
+
+Which once again generates the public and private keys. Next I needed
+to log in with the account set up for me by my partner. I copied
+first my public key to the server for the sake of key based
+authentication. I needed to figure out the IP address to do this, which
+we could find out by using the command
+
+hostname -i
+
+With that IP, I copied the public key to the server as mentioned.
+
+ssh-copy-id -i shaan@164.67.100.233
+
+Next I added the private key as well to the authentication agent.
+
+ssh-add
+
+Finally I was able to ssh into the server set up by my lab partner
+by using the -X flag for X11 forwarding:
+
+ssh -X shaan@164.67.100.233
+
+I could then try running a command on the remote host to open an internet
+browser like firefox by running just the command firefox:
+
+firefox
+
+And it opened on my computer.

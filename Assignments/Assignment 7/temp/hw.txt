@@ -1,0 +1,28 @@
+HOMEWORK
+
+1. Despite the fact that the teams were observing the bytes go across
+our network, it would still be secure. This is due to the fact that
+the bytes themselves are encrypted. Since the other teams do not
+have access to the private key (which is what can decrypt the data
+in the first place), they cannot decrypt our message digest.
+
+(1) In the case of knowing our keystrokes, the other teams could
+be able to reproduce our user name and password, allowing them access
+to our private key, thus compromising our encrypted bytes that they are
+presumably observing.
+
+(2) This would also be very insecure. The other teams would now have the
+ability to access the private key, which is exactly what is preventing
+our data from being decrypted in the first place.
+
+2. gpg --verify functions to verify that the document has integrity
+and is untampered. It does not try to figure out what its origin is. Thus
+a malicious user could pretend to be someone else, use their own public key
+with message digest algorithm to the receiver. The receiver would use
+the public key owned by the malicious user to decrypt the digest and
+compare with the document without encryption. The receiver will know
+certainly that the message was sent without modification, but they would
+not realize that the person who sent it was not who they believed it to
+be. Thus a trustworthy third party (like a certificate authority) is 
+necessary to verify the sender's identity based of the sender's issued
+digital certificate.
