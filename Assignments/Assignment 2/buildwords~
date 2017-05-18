@@ -1,0 +1,4 @@
+#! /bin/sh
+# buildwords --- constructs list of Hawaiian words from STDIN
+
+cat - | grep -w -P '(?<=<td>).+\s*(?=<\/td>)' | sed 's/<[^>]*>//g' | awk 'NR % 2 == 0' | sed "s/\`/'/g" | sed "s/ /\n/g" | tr -s "\n" | tr [:upper:] [:lower:] | sed "s/[,?]//g" | sed -r "s/.*[^pk'mnwlhaeiou].*//g" | sort -u | sed "/^$/d"

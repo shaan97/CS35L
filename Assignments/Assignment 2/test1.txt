@@ -1,0 +1,10 @@
+total 8
+20828774 drwxr-xr-x 2 shaan csugrad 4096 Jan 25 17:20 .
+ 5398239 drwxr-xr-x 6 shaan csugrad 4096 Jan 25 17:16 ..
+20828770 -rw-r--r-- 4 shaan csugrad   11 Jan 25 17:14 amor de vida
+20828770 -rw-r--r-- 4 shaan csugrad   11 Jan 25 17:14 amor.txt
+20828772 -rw-r--r-- 6 shaan csugrad    7 Jan 25 17:14 .cutie
+20828772 -rw-r--r-- 6 shaan csugrad    7 Jan 25 17:14 *cutie
+20828772 -rw-r--r-- 6 shaan csugrad    7 Jan 25 17:14 cutie.txt
+20828767 -rw-r--r-- 4 shaan csugrad   18 Jan 25 17:13 love.txt
+20828767 -rw-r--r-- 4 shaan csugrad   18 Jan 25 17:13 Love.txt

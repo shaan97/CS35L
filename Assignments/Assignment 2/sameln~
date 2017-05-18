@@ -1,0 +1,76 @@
+#! /bin/bash
+# sameln --- Create hard links out of duplicate entries in specified directory
+
+dir=$1
+RESULT=`ls -a $1 | sort`
+IFS=$'\n'
+
+#RESULT=`echo $RESULT | tr -s [:space:] '\n'`
+#echo "$1"
+#echo "$RESULT"
+
+
+
+declare -a DOTS
+declare -a REG
+numFiles=0
+numReg=0
+numDots=0
+for FILE in $RESULT
+do
+    #echo "$FILE"
+    if [ ! -r "$dir/$FILE" ]
+    then
+	echo "Error: File is not readable"
+    else
+	    if test ! -h  "$dir/$FILE"
+	    then
+		#echo "$dir/$FILE for first test"
+		if test -f  "$dir/$FILE"
+		then
+		    if [[ $FILE == .* ]]
+		    then
+			echo "$dir/$FILE starts with a ."
+			DOTS[$numDots]="$dir/$FILE"
+			numDots=$(($numDots+1))
+		    else
+			REG[$numReg]="$dir/$FILE"
+			numReg=$(($numReg+1))
+		    fi
+		fi
+	    fi
+    fi
+
+done
+
+numFiles=$(($numReg+$numDots))
+declare -a FILES=("${DOTS[@]}" "${REG[@]}")
+#echo "Count: $numFiles"
+
+for i in $(seq 0 $numFiles)
+do
+    next=$(($i+1))
+    for j in $(seq $next $numFiles)
+    do
+	if [ "$j" -eq "$numFiles" ]
+	then
+	    break
+	fi
+	
+	#echo "Comparing ${FILES[$i]} and ${FILES[$j]}"
+	cmp -s "${FILES[$i]}" "${FILES[$j]}"
+	status=$?
+	if [ "$status" -eq "0" ]
+	then
+    	    #echo "${FILES[$i]} and ${FILES[$j]} are the same"
+	    rm "${FILES[$j]}"
+	    ln "${FILES[$i]}" "${FILES[$j]}"
+	elif [ "$status" -gt "0" ]
+	then
+	    continue
+	else
+	    echo "Error while comparing files"
+	fi
+    done
+done
+
