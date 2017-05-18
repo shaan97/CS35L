@@ -1,0 +1,41 @@
+#! /usr/bin/sh
+
+python comm.py test1.txt test2.txt > result1.txt
+comm test1.txt test2.txt > result2.txt
+diff result1.txt result2.txt
+
+python comm.py -1 test1.txt test2.txt > result1.txt
+comm -1 test1.txt test2.txt > result2.txt
+diff result1.txt result2.txt
+
+python comm.py -2 test1.txt test2.txt > result1.txt
+comm -2 test1.txt test2.txt > result2.txt
+diff result1.txt result2.txt
+
+python comm.py -3 test1.txt test2.txt > result1.txt
+comm -3 test1.txt test2.txt > result2.txt
+diff result1.txt result2.txt
+
+python comm.py -12 test1.txt test2.txt > result1.txt
+comm -12 test1.txt test2.txt > result2.txt
+diff result1.txt result2.txt
+
+python comm.py -13 test1.txt test2.txt > result1.txt
+comm -13 test1.txt test2.txt > result2.txt
+diff result1.txt result2.txt
+
+python comm.py -23 test1.txt test2.txt > result1.txt
+comm -23 test1.txt test2.txt > result2.txt
+diff result1.txt result2.txt
+
+python comm.py -123 test1.txt test2.txt > result1.txt
+comm -123 test1.txt test2.txt > result2.txt
+diff result1.txt result2.txt
+
+cat test1.txt | python comm.py - test2.txt > result1.txt
+cat test1.txt | comm - test2.txt > result2.txt
+diff result1.txt result2.txt
+
+cat test2.txt | python comm.py  test1.txt - > result1.txt
+cat test2.txt | comm test1.txt - > result2.txt
+diff result1.txt result2.txt

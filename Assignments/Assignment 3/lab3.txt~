@@ -1,0 +1,130 @@
+LABORATORY
+================================================================================
+
+I begin by grabbing the Coreutils 7.6 by copying the download link and
+performing a wget on the SEASNET servers. Note that I am on lnxsrv07.
+
+wget ftp://ftp.gnu.org/gnu/coreutils/coreutils-7.6.tar.gz
+
+This extracts a new file into the current directory called coreutils-7.6 
+within a few moments.
+
+Next, we make a temporary directory under our home directory (~/) and call it
+~/coreutilsInstall.
+
+cd ~
+mkdir coreutilsInstall
+
+Changing directories back into the coreutils-7.6 directory, I execute the 
+following:
+
+./configure --prefix=/u/cs/ugrad/shaan/coreutilsInstall/
+
+This takes a minute to finish executing. Then I execute
+
+make
+
+which uses the "MakeFile" and compiles all the program code, generating
+executables in the current temporary directory.
+
+make install
+
+This searches for a label named install within the MakeFile, and only
+executes that section. The executables are copied into the final
+directories.
+
+Now everything has been compiled and installed. Now changing directories into
+the coreutils-7.6/src, we can execute:
+
+./ls -l
+
+Which generates the wrong format of the date, following the format of
+YYYY-MM-DD HH:MM.
+
+-rwxr-xr-x 1 shaan csugrad  91744 2017-01-28 21:11 whoami
+-rwxr-xr-x 1 shaan csugrad  90288 2017-01-28 21:11 yes
+
+On the contrary, using
+
+ls -l
+
+generates the desired output MONTH DAY HH:MM for files modified
+within the past year
+
+-rwxr-xr-x 1 shaan csugrad  91744 Jan 28 21:11 whoami
+-rwxr-xr-x 1 shaan csugrad  90288 Jan 28 21:11 yes
+
+
+
+We then wish to generate a patch file:
+
+emacs patch_file
+
+We then copy paste Padraig Brady's workaround patch into this file using the
+Emacs editor. To apply the patch, we note that we must get rid of the
+"dummy" folder names in Brady's email (e.g. "a/src/ls.c", "b/src/ls.c"). To
+perform this elegantly, we can use the -p[num] flag to get rid of leading
+directory names (thus getting rid of the a/ and b/). The appropriate flag
+would then be -p1.
+
+patch -p1 < patch_file
+
+
+After this, we cd up to the top level of the source tree and
+once again execute
+
+make
+
+Generating:
+
+...
+make all-am
+ CC dir.l
+ CC dir
+ CCLD vdir
+ CCLD ls
+...
+Making all in man
+ GEN dir.l
+ GEN vdir.l
+ GEN ls.l
+...
+
+The output says that the only files regenerated were ls.l, dir, vdir, ls,
+dir.l, vdir.l and ls.o were regenerated. These are all necessary files
+(ls and dir are esentially the same. Testing ./dir -l and ./ls -l results
+in the same output). Thus it makes sense that these files are all modified.
+
+Changing directories into the coreutils-7.6/src, we execute
+
+./ls -l
+
+which does indeed output the correct date format of MONTH DAY YEAR or
+MONTH DAY TIME, if the year is the current year. To test further, we create
+two new files in the same directory, one with a date from Jan 1, 2000
+
+touch z_test_file
+touch -t 200001010342.42 z_test_file2
+./ls -l
+
+This outputs the corret output, with z_test_file in the MONTH DAY TIME format
+and z_test_file2 in MONTH DAY YEAR format.
+
+-rw-r--r-- 1 shaan csugrad      0 Jan 28 21:46 z_test_file
+-rw-r--r-- 1 shaan csugrad      0 Jan  1  2000 z_test_file2
+
+It seems that the year is only included if the file is at least a year
+old. If it is not, then the time of last modification is included.
+
+Redirecting into the coreutilsInstall/bin directory and using
+
+./ls -l
+
+
+produces (at the tail)
+
+-rwxr-xr-x 1 shaan csugrad  91744 2017-01-28 21:11 whoami
+-rwxr-xr-x 1 shaan csugrad  90288 2017-01-28 21:11 yes
+
+
+This does put the wrong output with the wrong date format, as expected.

@@ -1,0 +1,42 @@
+1.)
+Brady's patch involved removing a goto statment that would
+basically jump the line of execution to the case block of
+code specified as "case_long_iso_time_style". Since having
+a specifier for that block of code was unnecessary, Brady
+decided to remove the specifier. The code would
+compile and execute the same regardless (since nowhere else 
+is a "goto case_long_iso_time_style" presumably used, as 
+removing it does indeed compile successfully). Brady
+likely removed it because since it was now unnecessary,
+it would keep the code clean.
+
+2.)
+If my company adopted this patch, we would be concerned
+about our clients in non-English speaking areas. The format
+in India for instance is DAY MONTH YEAR, which could be
+a source of confusion when looking at the MONTH DAY
+YEAR format. Additionally in other countries they may not
+be used to our names for months ("January" vs. "Enero" in
+Spanish). 
+
+3.)
+Because /dev/null is an empty file, the line of python code
+
+self.lines = f.readlines()
+
+ends up making lines an empty list. Due to this, invoking
+the member function chooseline(...) in turn invokes
+random.choice(self.lines). In the source code of random,
+there is a comment specifying that random.choice(...)
+raises an IndexError exception in the case that the given
+list is empty. Thus, IndexError is "raised," and execution
+halts.
+
+4.)
+Using Python 3 results in a compile error, since this code
+is not portable from Python 2 to Python 3. In particular,
+the syntax
+
+"except IOError as (errno, strerror):"
+		   ^
+is not valid Python 3. 
