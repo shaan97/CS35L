@@ -1,0 +1,7 @@
+-*- mode: compilation; default-directory: "~/Documents/CS35L/junk/" -*-
+Compilation started at Fri Jan 13 21:21:37
+
+make -k hello.c
+make: Nothing to be done for 'hello.c'.
+
+Compilation finished at Fri Jan 13 21:21:37

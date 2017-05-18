@@ -1,0 +1,20 @@
+--- test.txt	2017-01-14 14:45:10.524101000 -0800
++++ test2.txt	2017-01-14 14:45:57.329421000 -0800
+@@ -1,7 +1,4 @@
+-  /usr/bin:
+-  total used in directory 297196 available 13493736
+-  dr-xr-xr-x.   2 root root       69632 Jan  6 11:26 .
+-  drwxr-xr-x.  15 root root        4096 Nov 18 14:59 ..
++total 297120
+   -rwxr-xr-x    1 root root       41496 Jun 30  2016 [
+   -rwxr-xr-x    1 root root      107856 Aug 18 03:19 a2p
+   -rwxr-xr-x    1 root root       52640 Aug  3 05:34 ab
+@@ -2353,7 +2350,7 @@
+   -rwxr-xr-x    1 root root       10999 Aug  4 07:21 yumdownloader
+   -rwxr-xr-x    1 root root       11031 Aug  4 07:21 yum-groups-manager
+   -rwxr-xr-x    1 root root        1941 May 11  2015 zcat
+-  -rwxr-xr-x    1 root root        1760 May 11  2015 zcmp<
++-rwxr-xr-x    1 root root        1760 May 11  2015 zcmp
+   -rwxr-xr-x    1 root root        5768 May 11  2015 zdiff
+   -rwxr-xr-x    1 root root         123 May 11  2015 zegrep
+   -rwxr-xr-x.   1 root root        1118 Dec 29  2013 zenheiset
